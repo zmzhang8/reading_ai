@@ -1,13 +1,17 @@
 {
   "scripts": {
     "build": "webpack --config webpack.config.js",
-    "watch": "webpack --config webpack.config.js --watch"
+    "watch": "webpack --config webpack.config.js --watch",
+    "clean": "rm -r dist/"
   },
   "dependencies": {
     "@mozilla/readability": "^0.5.0"
   },
   "devDependencies": {
+    "@types/chrome": "^0.0.271",
     "copy-webpack-plugin": "^12.0.2",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.6.2",
     "webpack": "^5.94.0",
     "webpack-cli": "^5.1.4"
   }
