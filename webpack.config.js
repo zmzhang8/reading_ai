@@ -6,6 +6,7 @@ module.exports = {
     background: './src/scripts/background.ts',
     content: './src/scripts/content.ts',
     popup: './src/scripts/popup.ts',
+    sidepanel: './src/scripts/sidepanel.ts',
   },
   module: {
     rules: [
@@ -28,7 +29,7 @@ module.exports = {
       patterns: [
         { from: 'manifest.json', to: 'manifest.json' },
         { from: 'assets/', to: 'assets/' },
-        { from: 'src/popup.html', to: 'popup.html' },
+        { from: 'src/pages/', to: '.' },
       ],
     }),
   ],
