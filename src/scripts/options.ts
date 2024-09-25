@@ -85,10 +85,13 @@ function updateAPIUrls () {
   const providerSelect = document.getElementById('option-provider') as HTMLSelectElement;
   const apiKeyUrl = document.getElementById('api-key-url') as HTMLAnchorElement;
   const apiPricingUrl = document.getElementById('api-pricing-url') as HTMLAnchorElement;
+  const googleFreeTierText = document.getElementById('google-free-tier-text') as HTMLSpanElement;
 
   const selectedProvider = providerSelect.value;
   apiKeyUrl.href = PROVIDERS_TO_API_KEY_URL[selectedProvider]
   apiPricingUrl.href = PROVIDERS_TO_API_PRICING_URL[selectedProvider];
+  googleFreeTierText.className = selectedProvider === 'Google' ? '' : 'hidden';
+
 }
 
 function loadSavedOptions () {
