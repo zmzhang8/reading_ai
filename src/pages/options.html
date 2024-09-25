@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Options</title>
+  <link rel="stylesheet" href="styles/options.css">
+</head>
+
+<body>
+
+  <h1>Configuration Options</h1>
+
+  <div class="option-group">
+    <label for="option-language">Translation Language</label>
+    <select id="option-language">
+      <option value="en">English</option>
+      <option value="fr">French</option>
+      <option value="es">Spanish</option>
+    </select>
+  </div>
+
+  <div class="option-group">
+    <label for="option-provider">Provider</label>
+    <select id="option-provider"></select>
+  </div>
+
+  <div class="option-group">
+    <label for="option-model">Model</label>
+    <select id="option-model"></select>
+  </div>
+
+  <div class="option-group">
+    <label for="option-api-key">API Key</label>
+    <input type="password" id="option-api-key" placeholder="Enter API Key">
+  </div>
+
+  <button id="save-button">Save</button>
+  <div id="save-message"></div>
+
+  <script src="options.js"></script>
+
+</body>
+
+</html>
