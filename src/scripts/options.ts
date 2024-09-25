@@ -19,6 +19,16 @@ const PROVIDERS_TO_MODELS: { readonly [key: string]: readonly string[] } = {
   OpenAI: ['gpt-4o-mini', 'gpt-4o'],
 };
 
+const PROVIDERS_TO_API_KEY_URL: { readonly [key: string]: string } = {
+  Google: 'https://aistudio.google.com/app/apikey',
+  OpenAI: 'https://platform.openai.com/api-keys',
+};
+
+const PROVIDERS_TO_API_PRICING_URL: { readonly [key: string]: string } = {
+  Google: 'https://ai.google.dev/pricing',
+  OpenAI: 'https://openai.com/api/pricing',
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   populateLanguages();
   populateProvidersAndModels();
@@ -48,8 +58,10 @@ function populateProvidersAndModels () {
   }
 
   updateModelOptions();
+  updateAPIUrls();
   providerSelect.addEventListener('change', () => {
     updateModelOptions();
+    updateAPIUrls();
   });
 }
 
@@ -69,6 +81,16 @@ function updateModelOptions () {
   });
 }
 
+function updateAPIUrls () {
+  const providerSelect = document.getElementById('option-provider') as HTMLSelectElement;
+  const apiKeyUrl = document.getElementById('api-key-url') as HTMLAnchorElement;
+  const apiPricingUrl = document.getElementById('api-pricing-url') as HTMLAnchorElement;
+
+  const selectedProvider = providerSelect.value;
+  apiKeyUrl.href = PROVIDERS_TO_API_KEY_URL[selectedProvider]
+  apiPricingUrl.href = PROVIDERS_TO_API_PRICING_URL[selectedProvider];
+}
+
 function loadSavedOptions () {
   chrome.storage.local.get(['language', 'provider', 'model', 'apiKey'],
     (result) => {
@@ -76,6 +98,7 @@ function loadSavedOptions () {
         (document.getElementById('option-language') as HTMLSelectElement).value = (result.language as string);
         (document.getElementById('option-provider') as HTMLSelectElement).value = (result.provider as string);
         updateModelOptions();
+        updateAPIUrls();
         (document.getElementById('option-model') as HTMLSelectElement).value = (result.model as string);
         (document.getElementById('option-api-key') as HTMLInputElement).value = (result.apiKey as string);
       }

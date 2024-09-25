@@ -49,3 +49,17 @@ button:hover {
     background-color: #f2dede;
     color: #a94442;
 }
+
+.api-key-instruction {
+    margin-top: 5px;
+    color: #666;
+}
+
+.api-key-instruction a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.api-key-instruction a:hover {
+    text-decoration: underline;
+}
