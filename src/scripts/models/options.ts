@@ -19,9 +19,9 @@ export function saveOptionsToStorage(options: Options, callback: () => void) {
 }
 
 export const LANGUAGES: { readonly [key: string]: string } = {
+  en: "English",
   ar: "العربية",
   de: "Deutsch",
-  en: "English",
   es: "Español",
   fr: "Français",
   hi: "हिन्दी",
