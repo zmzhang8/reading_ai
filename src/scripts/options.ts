@@ -1,33 +1,13 @@
-const LANGUAGES: { readonly [key: string]: string } = {
-  ar: 'العربية',
-  de: 'Deutsch',
-  en: 'English',
-  es: 'Español',
-  fr: 'Français',
-  hi: 'हिन्दी',
-  it: 'Italiano',
-  ja: '日本語',
-  ko: '한국어',
-  pt: 'Português',
-  ru: 'Русский',
-  'zh-Hans': '简体中文',
-  'zh-Hant': '繁體中文',
-}
+import { createChatModel } from './models/chat_model';
+import {
+  LANGUAGES,
+  PROVIDERS_TO_MODELS,
+  PROVIDERS_TO_API_KEY_URL,
+  PROVIDERS_TO_API_PRICING_URL,
+  loadOptionsFromStorage,
+  saveOptionsToStorage,
+} from './models/options';
 
-const PROVIDERS_TO_MODELS: { readonly [key: string]: readonly string[] } = {
-  Google: ['gemini-1.5-flash', 'gemini-1.5-pro'],
-  OpenAI: ['gpt-4o-mini', 'gpt-4o'],
-};
-
-const PROVIDERS_TO_API_KEY_URL: { readonly [key: string]: string } = {
-  Google: 'https://aistudio.google.com/app/apikey',
-  OpenAI: 'https://platform.openai.com/api-keys',
-};
-
-const PROVIDERS_TO_API_PRICING_URL: { readonly [key: string]: string } = {
-  Google: 'https://ai.google.dev/pricing',
-  OpenAI: 'https://openai.com/api/pricing',
-};
 
 document.addEventListener('DOMContentLoaded', () => {
   populateLanguages();
@@ -95,18 +75,16 @@ function updateAPIUrls () {
 }
 
 function loadSavedOptions () {
-  chrome.storage.local.get(['language', 'provider', 'model', 'apiKey'],
-    (result) => {
-      if (result.apiKey) {
-        (document.getElementById('option-language') as HTMLSelectElement).value = (result.language as string);
-        (document.getElementById('option-provider') as HTMLSelectElement).value = (result.provider as string);
-        updateModelOptions();
-        updateAPIUrls();
-        (document.getElementById('option-model') as HTMLSelectElement).value = (result.model as string);
-        (document.getElementById('option-api-key') as HTMLInputElement).value = (result.apiKey as string);
-      }
+  loadOptionsFromStorage((options) => {
+    if (options.apiKey) {
+      (document.getElementById('option-language') as HTMLSelectElement).value = options.language;
+      (document.getElementById('option-provider') as HTMLSelectElement).value = options.provider;
+      updateModelOptions();
+      updateAPIUrls();
+      (document.getElementById('option-model') as HTMLSelectElement).value = options.model;
+      (document.getElementById('option-api-key') as HTMLInputElement).value = options.apiKey;
     }
-  );
+  });
 }
 
 function saveOptions () {
@@ -116,27 +94,30 @@ function saveOptions () {
   const apiKey = (document.getElementById('option-api-key') as HTMLInputElement).value.trim();
 
   if (apiKey) {
-    chrome.storage.local.clear();
-    chrome.storage.local.set(
-      {
-        language: language,
-        provider: provider,
-        model: model,
-        apiKey: apiKey,
-      },
-      () => {
-        showSaveMessage('Configuration is saved.', 'success');
-      }
-    );
+    testModelConnection(provider, model, apiKey).then(() => {
+      saveOptionsToStorage(
+        {
+          language: language,
+          provider: provider,
+          model: model,
+          apiKey: apiKey,
+        },
+        () => {
+          window.close();
+        }
+      );
+    }).catch((reason) => {
+      showSaveMessage(reason.toString(), false);
+    });
   } else {
-    showSaveMessage('API key is required.', 'error');
+    showSaveMessage('API key is required.', false);
   }
 }
 
-function showSaveMessage (text: string, type: string) {
+function showSaveMessage (text: string, success: boolean) {
   const saveMessage = (document.getElementById('save-message') as HTMLDivElement);
   saveMessage.textContent = text;
-  saveMessage.className = type;
+  saveMessage.className = success ? 'success' : 'error';
   setTimeout(() => {
     saveMessage.textContent = '';
     saveMessage.className = '';
@@ -146,4 +127,19 @@ function showSaveMessage (text: string, type: string) {
 function setupSaveButton () {
   const saveButton = document.getElementById('save-button') as HTMLButtonElement;
   saveButton.addEventListener('click', saveOptions);
+}
+
+async function testModelConnection (provider: string, modelName: string, apiKey: string) {
+  const llm = createChatModel(provider, modelName, apiKey, 1)!;
+  return await withTimeout(llm?.invoke('Say "Hi"', {timeout: 3}), 3000, 'Cannot verify API key.');
+}
+
+function withTimeout<T> (promise: Promise<T>, timeoutMs: number, error: string): Promise<T> {
+  const timeoutPromise = new Promise<T>((_, reject) => {
+    setTimeout(() => {
+      reject(new Error(error));
+    }, timeoutMs);
+  });
+
+  return Promise.race([promise, timeoutPromise]);
 }
