@@ -57,14 +57,13 @@ button.active svg {
   position: sticky;
   top: 0;
   z-index: 100;
-  background-color: white;
+  margin: 10px 0;
 }
 
 #lookup-result {
   flex-grow: 1;
   overflow-y: auto;
   max-height: 400px;
-  margin-top: 10px;
   font-size: 14px;
   color: #333;
   padding-right: 10px;
