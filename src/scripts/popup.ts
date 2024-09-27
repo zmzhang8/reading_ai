@@ -53,9 +53,9 @@ function setupLookupButton() {
 
   lookupInput.addEventListener("input", () => {
     if (lookupInput.value.trim() !== "") {
-      lookupButton.classList.add("active");
+      lookupButton.classList.remove("inactive");
     } else {
-      lookupButton.classList.remove("active");
+      lookupButton.classList.add("inactive");
     }
   });
 }
