@@ -1,4 +1,6 @@
-import { createChatModel } from "./models/chat_model";
+import { options } from "marked";
+import { ChatRole } from "./chat_models/chat_model";
+import { createChatModel } from "./utils/model_helper";
 import {
   LANGUAGES,
   PROVIDERS_TO_MODELS,
@@ -6,7 +8,7 @@ import {
   PROVIDERS_TO_API_PRICING_URL,
   loadOptionsFromStorage,
   saveOptionsToStorage,
-} from "./models/options";
+} from "./utils/options";
 
 document.addEventListener("DOMContentLoaded", () => {
   populateLanguages();
@@ -146,7 +148,7 @@ function showSaveMessage(text: string, success: boolean) {
   setTimeout(() => {
     saveMessage.textContent = "";
     saveMessage.className = "";
-  }, 3000);
+  }, 5000);
 }
 
 function setupSaveButton() {
@@ -161,24 +163,16 @@ async function testModelConnection(
   modelName: string,
   apiKey: string
 ) {
-  const llm = createChatModel(provider, modelName, apiKey, 1)!;
-  return await withTimeout(
-    llm?.invoke('Say "Hi"', { timeout: 3 }),
-    3000,
-    "Cannot verify API key."
-  );
-}
-
-function withTimeout<T>(
-  promise: Promise<T>,
-  timeoutMs: number,
-  error: string
-): Promise<T> {
-  const timeoutPromise = new Promise<T>((_, reject) => {
-    setTimeout(() => {
-      reject(new Error(error));
-    }, timeoutMs);
+  const model = createChatModel(provider, {
+    apiKey: apiKey,
+    modelName: modelName,
   });
-
-  return Promise.race([promise, timeoutPromise]);
+  return model.generate(
+    [{ role: ChatRole.User, content: 'Say "Hi"' }],
+    undefined,
+    {
+      maxOutputTokens: 1,
+      timeoutMs: 3000,
+    }
+  );
 }

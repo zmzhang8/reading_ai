@@ -1,8 +1,8 @@
-import { createChatModel } from "./models/chat_model";
-import { LanguageExpert } from "./models/language_expert";
-import { loadOptionsFromStorage, Options, LANGUAGES } from "./models/options";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
+import { LanguageAgent } from "./agents/language_agent";
+import { createChatModel } from "./utils/model_helper";
+import { loadOptionsFromStorage, LANGUAGES } from "./utils/options";
 
 document.addEventListener("DOMContentLoaded", () => {
   chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
@@ -77,34 +77,37 @@ function setupLookupButton() {
   });
 }
 
+let languageAgent: LanguageAgent;
+let language: string;
+
 function setupAndLookup(text: string) {
   (document.getElementById("lookup-result") as HTMLDivElement).innerHTML = "";
-  loadOptionsFromStorage((options) => {
-    if (options?.apiKey) {
-      const model = createChatModel(
-        options.provider,
-        options.model,
-        options.apiKey,
-      );
-      const languageExpert = new LanguageExpert(model);
-      lookup(languageExpert, options.language, text);
-    } else {
-      chrome.runtime.openOptionsPage();
-    }
-  });
+  if (languageAgent && language) {
+    lookup(text);
+  } else {
+    loadOptionsFromStorage((options) => {
+      if (options?.apiKey) {
+        const model = createChatModel(options.provider, {
+          apiKey: options.apiKey,
+          modelName: options.model,
+          timeoutMs: 5000,
+        });
+        languageAgent = new LanguageAgent(model);
+        lookup(text);
+      } else {
+        chrome.runtime.openOptionsPage();
+      }
+    });
+  }
 }
 
-async function lookup(
-  languageExpert: LanguageExpert,
-  language: string,
-  text: string
-) {
+async function lookup(text: string) {
   const lookupResult = document.getElementById(
     "lookup-result"
   ) as HTMLDivElement;
   const languageName = LANGUAGES[language];
-  await languageExpert
-    .invoke({ language: languageName, text: text })
+  await languageAgent
+    .generate({ language: languageName, text: text })
     .then(async (value) => {
       const htmlString = DOMPurify.sanitize(await marked(value));
       lookupResult.innerHTML = htmlString;

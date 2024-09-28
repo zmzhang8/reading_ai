@@ -5,12 +5,11 @@
     "clean": "rm -r dist/"
   },
   "dependencies": {
-    "@langchain/core": "^0.3.3",
-    "@langchain/google-genai": "^0.1.0",
-    "@langchain/openai": "^0.3.2",
+    "@google/generative-ai": "^0.20.0",
     "@mozilla/readability": "^0.5.0",
     "dompurify": "^3.1.7",
-    "marked": "^14.1.2"
+    "marked": "^14.1.2",
+    "openai": "^4.65.0"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.271",
