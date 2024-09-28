@@ -124,7 +124,7 @@ A few efficient memory techniques and tips to better remember the word and the s
 
 ### Translation
 ---
-Translation of the input if the input's language is different from {{Target Language}}. The original input otherwise.
+Translation of the input to {{Target Language}} if the input's language is different from {{Target Language}}. Tell the user the input is already in {{Target Language}} otherwise.
 ---
 
 ## Workflow
