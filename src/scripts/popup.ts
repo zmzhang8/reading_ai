@@ -90,7 +90,7 @@ function setupAndLookup(text: string) {
         const model = createChatModel(options.provider, {
           apiKey: options.apiKey,
           modelName: options.model,
-          timeoutMs: 5000,
+          timeoutMs: 3000,
         });
         languageAgent = new LanguageAgent(model);
         lookup(text);
