@@ -4,7 +4,21 @@ import { LanguageAgent } from "./agents/language_agent";
 import { createChatModel } from "./utils/model_helper";
 import { loadOptionsFromStorage, LANGUAGES } from "./utils/options";
 
+let aiQuery = "";
+
 document.addEventListener("DOMContentLoaded", () => {
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === "getAIQuery") {
+      if (aiQuery) {
+        sendResponse(
+          (document.getElementById("lookup-input") as HTMLInputElement).value
+        );
+        aiQuery = "";
+      }
+      window.close();
+    }
+  });
+
   chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
     if (tab.id) {
       setupKeyboardShortcuts(tab.id);
@@ -34,16 +48,13 @@ document.addEventListener("DOMContentLoaded", () => {
   setupLookupButton();
 });
 
-function openSidePanel(tabId: number) {
-  chrome.sidePanel
-    .setOptions({
-      tabId: tabId,
-      path: "sidepanel.html",
-      enabled: true,
-    })
-    .then(() => {
-      chrome.sidePanel.open({ tabId: tabId });
-    });
+async function openSidePanel(tabId: number) {
+  await chrome.sidePanel.setOptions({
+    tabId: tabId,
+    path: "sidepanel.html",
+    enabled: true,
+  });
+  await chrome.sidePanel.open({ tabId: tabId });
 }
 
 function setupKeyboardShortcuts(tabId: number) {
@@ -56,8 +67,8 @@ function setupKeyboardShortcuts(tabId: number) {
         setupAndLookup(lookupInput.value.trim());
       }
     } else if (event.key == "Enter" && event.shiftKey) {
+      aiQuery = lookupInput.value.trim();
       openSidePanel(tabId);
-      window.close();
     }
   });
 }

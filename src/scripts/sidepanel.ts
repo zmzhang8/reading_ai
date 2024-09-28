@@ -5,7 +5,17 @@ document.addEventListener("DOMContentLoaded", () => {
         tab.id,
         { action: "getReadableContent" },
         (readableContent: string) => {
-          document.getElementById("sidePanelText")!.innerHTML = readableContent;
+          (document.getElementById("readingMode") as HTMLDivElement).innerHTML =
+            readableContent;
+
+          chrome.runtime.sendMessage(
+            { action: "getAIQuery" },
+            (query: string) => {
+              (
+                document.getElementById("aiQuery") as HTMLDivElement
+              ).textContent = query;
+            }
+          );
         }
       );
     } else {
