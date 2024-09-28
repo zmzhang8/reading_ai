@@ -18,7 +18,7 @@ export function saveOptionsToStorage(options: Options, callback: () => void) {
   chrome.storage.local.set(options, callback);
 }
 
-export const LANGUAGES: { readonly [key: string]: string } = {
+export const LANGUAGES: Readonly<{ [key: string]: string }> = {
   en: "English",
   ar: "العربية",
   de: "Deutsch",
@@ -34,19 +34,25 @@ export const LANGUAGES: { readonly [key: string]: string } = {
   "zh-Hant": "繁體中文",
 };
 
-export const PROVIDERS_TO_MODELS: {
-  readonly [key: string]: readonly string[];
-} = {
-  Google: ["gemini-1.5-flash", "gemini-1.5-pro"],
-  OpenAI: ["gpt-4o-mini", "gpt-4o"],
+export const PROVIDERS_TO_MODELS: Readonly<{
+  [key: string]: Readonly<{ [key: string]: string }>;
+}> = {
+  Google: {
+    "gemini-1.5-flash": "gemini-1.5-flash (fast for everyday use)",
+    "gemini-1.5-pro": "gemini-1.5-pro (great for complex use)",
+  },
+  OpenAI: {
+    "gpt-4o-mini": "gpt-4o-mini (fast for everyday use)",
+    "gpt-4o": "gpt-4o (great for complex use)",
+  },
 };
 
-export const PROVIDERS_TO_API_KEY_URL: { readonly [key: string]: string } = {
+export const PROVIDERS_TO_API_KEY_URL: Readonly<{ [key: string]: string }> = {
   Google: "https://aistudio.google.com/app/apikey",
   OpenAI: "https://platform.openai.com/api-keys",
 };
 
-export const PROVIDERS_TO_API_PRICING_URL: { readonly [key: string]: string } =
+export const PROVIDERS_TO_API_PRICING_URL: Readonly<{ [key: string]: string }> =
   {
     Google: "https://ai.google.dev/pricing",
     OpenAI: "https://openai.com/api/pricing",

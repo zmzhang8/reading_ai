@@ -61,13 +61,13 @@ function updateModelOptions() {
   modelSelect.innerHTML = "";
 
   const selectedProvider = providerSelect.value;
-  const models = PROVIDERS_TO_MODELS[selectedProvider] || [];
-  models.forEach((model) => {
+  const models = PROVIDERS_TO_MODELS[selectedProvider] || {};
+  for (const [key, value] of Object.entries(models)) {
     const option = document.createElement("option");
-    option.value = model;
-    option.textContent = model;
+    option.value = key;
+    option.textContent = value;
     modelSelect.appendChild(option);
-  });
+  }
 }
 
 function updateAPIUrls() {
