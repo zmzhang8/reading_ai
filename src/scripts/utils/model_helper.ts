@@ -12,7 +12,7 @@ export function createChatModel(
     return new OpenAIChatModel(options);
   } else {
     throw Error(
-      `Unsupported provider ${provider} with model ${options.modelName}.`
+      `Unsupported provider ${provider}.`
     );
   }
 }
