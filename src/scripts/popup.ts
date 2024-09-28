@@ -86,7 +86,8 @@ function setupAndLookup (text: string) {
     lookup(text);
   } else {
     loadOptionsFromStorage((options) => {
-      if (options?.apiKey) {
+      if (options.apiKey) {
+        language = options.language;
         const model = createChatModel(options.provider, {
           apiKey: options.apiKey,
           modelName: options.model,
