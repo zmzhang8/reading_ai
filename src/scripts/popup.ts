@@ -7,6 +7,7 @@ import { loadOptionsFromStorage, LANGUAGES } from "./utils/options";
 document.addEventListener("DOMContentLoaded", () => {
   chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
     if (tab.id) {
+      setupKeyboardShortcuts(tab.id);
       setupAIButton(tab.id);
 
       chrome.tabs.sendMessage(
@@ -33,19 +34,38 @@ document.addEventListener("DOMContentLoaded", () => {
   setupLookupButton();
 });
 
+function openSidePanel(tabId: number) {
+  chrome.sidePanel
+    .setOptions({
+      tabId: tabId,
+      path: "sidepanel.html",
+      enabled: true,
+    })
+    .then(() => {
+      chrome.sidePanel.open({ tabId: tabId });
+    });
+}
+
+function setupKeyboardShortcuts(tabId: number) {
+  const lookupInput = document.getElementById(
+    "lookup-input"
+  ) as HTMLInputElement;
+  lookupInput.addEventListener("keyup", (event) => {
+    if (event.key == "Enter" && !event.shiftKey) {
+      if (lookupInput.value.trim()) {
+        setupAndLookup(lookupInput.value.trim());
+      }
+    } else if (event.key == "Enter" && event.shiftKey) {
+      openSidePanel(tabId);
+      window.close();
+    }
+  });
+}
+
 function setupAIButton(tabId: number) {
   const aiButton = document.getElementById("ai-button") as HTMLButtonElement;
-  aiButton.classList.add("active");
   aiButton.addEventListener("click", () => {
-    chrome.sidePanel
-      .setOptions({
-        tabId: tabId,
-        path: "sidepanel.html",
-        enabled: true,
-      })
-      .then(() => {
-        chrome.sidePanel.open({ tabId: tabId });
-      });
+    openSidePanel(tabId);
     window.close();
   });
 }
@@ -60,11 +80,6 @@ function setupLookupButton() {
 
   lookupInput.addEventListener("input", () => {
     if (lookupInput.value.trim()) {
-      lookupInput.addEventListener("keyup", (event) => {
-        if (event.key == "Enter") {
-          setupAndLookup(lookupInput.value.trim());
-        }
-      });
       lookupButton.addEventListener("click", () => {
         setupAndLookup(lookupInput.value.trim());
       });
@@ -72,7 +87,6 @@ function setupLookupButton() {
     } else {
       lookupButton.classList.add("inactive");
       lookupButton.removeEventListener("click", () => {});
-      lookupInput.removeEventListener("keyup", () => {});
     }
   });
 }
@@ -80,7 +94,7 @@ function setupLookupButton() {
 let languageAgent: LanguageAgent;
 let language: string;
 
-function setupAndLookup (text: string) {
+function setupAndLookup(text: string) {
   (document.getElementById("lookup-result") as HTMLDivElement).innerHTML = "";
   if (languageAgent && language) {
     lookup(text);
@@ -102,7 +116,7 @@ function setupAndLookup (text: string) {
   }
 }
 
-async function lookup (text: string) {
+async function lookup(text: string) {
   const loaderContainer = document.getElementById(
     "loader-container"
   ) as HTMLDivElement;
