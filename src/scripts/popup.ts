@@ -80,7 +80,7 @@ function setupLookupButton() {
 let languageAgent: LanguageAgent;
 let language: string;
 
-function setupAndLookup(text: string) {
+function setupAndLookup (text: string) {
   (document.getElementById("lookup-result") as HTMLDivElement).innerHTML = "";
   if (languageAgent && language) {
     lookup(text);
@@ -101,18 +101,25 @@ function setupAndLookup(text: string) {
   }
 }
 
-async function lookup(text: string) {
+async function lookup (text: string) {
+  const loaderContainer = document.getElementById(
+    "loader-container"
+  ) as HTMLDivElement;
   const lookupResult = document.getElementById(
     "lookup-result"
   ) as HTMLDivElement;
+  loaderContainer.classList.remove("hidden");
+
   const languageName = LANGUAGES[language];
   await languageAgent
     .generate({ language: languageName, text: text })
     .then(async (value) => {
+      loaderContainer.classList.add("hidden");
       const htmlString = DOMPurify.sanitize(await marked(value));
       lookupResult.innerHTML = htmlString;
     })
     .catch((reason) => {
+      loaderContainer.classList.add("hidden");
       lookupResult.textContent = reason.toString();
     });
 }
