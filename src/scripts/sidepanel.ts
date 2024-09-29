@@ -45,6 +45,7 @@ function setupKeyboardShortcuts() {
   ) as HTMLTextAreaElement;
   userInput.addEventListener("keydown", (event) => {
     if (event.key == "Enter" && !event.shiftKey) {
+      event.preventDefault();
       if (userInput.value.trim()) {
         sendMessage(userInput.value.trim());
       }
