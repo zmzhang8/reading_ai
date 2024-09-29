@@ -1,8 +1,6 @@
-import { marked } from "marked";
 import DOMPurify from "dompurify";
-import { LanguageAgent } from "./agents/language_agent";
-import { createChatModel } from "./utils/model_helper";
-import { loadOptionsFromStorage, LANGUAGES } from "./utils/options";
+import { marked } from "marked";
+import { AgentType, getAgent } from "./utils/agent_helper";
 
 let aiQuery = "";
 
@@ -30,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
             (
               document.getElementById("lookup-input") as HTMLInputElement
             ).value = selectedContent;
-            setupAndLookup(selectedContent);
+            agentCompletion(selectedContent);
           }
         }
       );
@@ -75,7 +73,7 @@ function setupLookupButton() {
 
   lookupButton.addEventListener("click", () => {
     if (lookupInput.value.trim()) {
-      setupAndLookup(lookupInput.value.trim());
+      agentCompletion(lookupInput.value.trim());
     }
   });
 }
@@ -96,7 +94,7 @@ function setupKeyboardShortcuts(tabId: number) {
     if (event.key == "Enter" && !event.shiftKey) {
       event.preventDefault();
       if (lookupInput.value.trim()) {
-        setupAndLookup(lookupInput.value.trim());
+        agentCompletion(lookupInput.value.trim());
       }
     } else if (event.key == "Enter" && event.shiftKey) {
       event.preventDefault();
@@ -106,50 +104,31 @@ function setupKeyboardShortcuts(tabId: number) {
   });
 }
 
-let languageAgent: LanguageAgent;
-let language: string;
-
-function setupAndLookup(text: string) {
-  (document.getElementById("lookup-result") as HTMLDivElement).innerHTML = "";
-  if (languageAgent && language) {
-    lookup(text);
-  } else {
-    loadOptionsFromStorage((options) => {
-      if (options && options.apiKey) {
-        language = options.language;
-        const model = createChatModel(options.provider, {
-          apiKey: options.apiKey,
-          modelName: options.model,
-          timeoutMs: 3000,
-        });
-        languageAgent = new LanguageAgent(model);
-        lookup(text);
-      } else {
-        chrome.runtime.openOptionsPage();
-      }
-    });
-  }
-}
-
-async function lookup(text: string) {
+function agentCompletion(text: string) {
   const loaderContainer = document.getElementById(
     "loader-container"
   ) as HTMLDivElement;
   const lookupResult = document.getElementById(
     "lookup-result"
   ) as HTMLDivElement;
-  loaderContainer.classList.remove("hidden");
 
-  const languageName = LANGUAGES[language];
-  await languageAgent
-    .generate({ language: languageName, text: text })
-    .then(async (value) => {
-      loaderContainer.classList.add("hidden");
-      const htmlString = DOMPurify.sanitize(await marked(value));
-      lookupResult.innerHTML = htmlString;
-    })
-    .catch((reason) => {
-      loaderContainer.classList.add("hidden");
-      lookupResult.textContent = reason.toString();
-    });
+  lookupResult.innerHTML = "";
+  getAgent(AgentType.LanguageAgent, text, (agent) => {
+    if (agent) {
+      loaderContainer.classList.remove("hidden");
+      agent
+        .generate([], 3000)
+        .then(async (result) => {
+          loaderContainer.classList.add("hidden");
+          const htmlString = DOMPurify.sanitize(await marked(result));
+          lookupResult.innerHTML = htmlString;
+        })
+        .catch((reason) => {
+          loaderContainer.classList.add("hidden");
+          lookupResult.textContent = reason.toString();
+        });
+    } else {
+      chrome.runtime.openOptionsPage();
+    }
+  });
 }

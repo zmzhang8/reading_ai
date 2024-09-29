@@ -1,26 +1,26 @@
-import { ChatModel, ChatRole } from "../chat_models/chat_model";
+import { Agent } from "./agent";
+import { ChatMessage, ChatModel, ChatRole } from "../chat_models/chat_model";
 
-export interface LanguageAgentInputs {
+export interface LanguageAgentOptions {
   language: string;
   text: string;
 }
 
-export class LanguageAgent {
+export class LanguageAgent implements Agent {
   model: ChatModel;
+  options: LanguageAgentOptions;
 
-  constructor(model: ChatModel) {
+  constructor(model: ChatModel, options: LanguageAgentOptions) {
     this.model = model;
+    this.options = options;
   }
 
-  async generate(inputs: LanguageAgentInputs): Promise<string> {
-    const systemPrompt = LANGUAGE_AGENT_SYSTEM_PROMPT.replace(
+  async generate(messages: ChatMessage[], timeoutMs?: number): Promise<string> {
+    const systemPrompt = SYSTEM_PROMPT.replace(
       /\${language}/g,
-      inputs.language
+      this.options.language
     );
-    const userPrompt = LANGUAGE_AGENT_USER_PROMPT.replace(
-      /\${text}/g,
-      inputs.text
-    );
+    const userPrompt = USER_PROMPT.replace(/\${text}/g, this.options.text);
 
     const result = await this.model.generate(
       [{ role: ChatRole.User, content: userPrompt }],
@@ -42,7 +42,7 @@ export class LanguageAgent {
   }
 }
 
-const LANGUAGE_AGENT_SYSTEM_PROMPT = `<instruction>
+const SYSTEM_PROMPT = `<instruction>
 
 # Role: Language Expert
 
@@ -137,4 +137,4 @@ Translation of the input to {{Target Language}}.
 
 </instruction>`;
 
-const LANGUAGE_AGENT_USER_PROMPT = `<input>\${text}</input>`;
+const USER_PROMPT = `<input>\${text}</input>`;

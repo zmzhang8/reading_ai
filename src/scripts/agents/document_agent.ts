@@ -1,11 +1,11 @@
+import { Agent } from "./agent";
 import { ChatMessage, ChatModel, ChatRole } from "../chat_models/chat_model";
 
 export interface DocumentAgentOptions {
-  language: string;
   document?: string;
 }
 
-export class DocumentAgent {
+export class DocumentAgent implements Agent {
   model: ChatModel;
   options: DocumentAgentOptions;
 
@@ -15,11 +15,7 @@ export class DocumentAgent {
   }
 
   async generate(messages: ChatMessage[], timeoutMs?: number): Promise<string> {
-    const systemPrompt = SYSTEM_PROMPT.replace(
-      /\${language}/g,
-      this.options.language
-    );
-
+    const systemPrompt = SYSTEM_PROMPT;
     const queryMessages = [...messages];
     if (this.options.document) {
       const documentPrompt = DOCUMENT_PROMPT.replace(

@@ -1,7 +1,8 @@
-import { Agent } from "../agents/agent";
-import { DocumentAgent } from "../agents/document_agent";
 import { ChatModel } from "../chat_models/chat_model";
 import { createChatModel } from "./model_helper";
+import { Agent } from "../agents/agent";
+import { DocumentAgent } from "../agents/document_agent";
+import { LanguageAgent } from "../agents/language_agent";
 import { loadOptionsFromStorage, Options } from "./options";
 
 let language: string;
@@ -38,8 +39,14 @@ export function getAgent(
 }
 
 function createAgent(type: AgentType, document?: string): Agent {
-  if (type === AgentType.DocumentAgent) {
-    return new DocumentAgent(model, { language: language, document: document });
+  if (type === AgentType.LanguageAgent) {
+    if (document) {
+      return new LanguageAgent(model, { language: language, text: document });
+    } else {
+      throw Error(`Language agent requires document`);
+    }
+  } else if (type === AgentType.DocumentAgent) {
+    return new DocumentAgent(model, { document: document });
   } else {
     throw Error(`Unsupport agent type ${type}`);
   }

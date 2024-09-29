@@ -1,8 +1,8 @@
+import DOMPurify from "dompurify";
 import { marked } from "marked";
 import { ChatRole } from "./chat_models/chat_model";
 import { AgentType, getAgent } from "./utils/agent_helper";
 import { ChatMessage, ChatSession } from "./utils/chat_session";
-import DOMPurify from "dompurify";
 
 const greetingsWithPage = "I have read the page. How can I assist you?";
 const greetingsWithoutPage =
@@ -116,9 +116,9 @@ function agentCompletion(type: AgentType, message: string) {
   const userInput = document.getElementById(
     "user-input"
   ) as HTMLTextAreaElement;
+
   userInput.value = "";
   resizeInputHeight();
-
   addMessage({
     role: ChatRole.User,
     content: message,
@@ -127,23 +127,27 @@ function agentCompletion(type: AgentType, message: string) {
   });
 
   getAgent(type, pageContent, (agent) => {
-    agent
-      ?.generate(chatSession.getModelVisibleMessages(), 5000)
-      .then(async (result) => {
-        addMessage({
-          role: ChatRole.Model,
-          content: result,
-          userVisible: true,
-          modelVisible: true,
+    if (agent) {
+      agent
+        .generate(chatSession.getModelVisibleMessages(), 5000)
+        .then(async (result) => {
+          addMessage({
+            role: ChatRole.Model,
+            content: result,
+            userVisible: true,
+            modelVisible: true,
+          });
+        })
+        .catch((reason) => {
+          addMessage({
+            role: ChatRole.Model,
+            content: reason.toString(),
+            userVisible: true,
+            modelVisible: false,
+          });
         });
-      })
-      .catch((reason) => {
-        addMessage({
-          role: ChatRole.Model,
-          content: reason.toString(),
-          userVisible: true,
-          modelVisible: false,
-        });
-      });
+    } else {
+      chrome.runtime.openOptionsPage();
+    }
   });
 }
