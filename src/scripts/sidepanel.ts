@@ -8,6 +8,7 @@ const greetingsWithPage = "I have read the page. How can I assist you?";
 const greetingsWithoutPage =
   "I'm unable to read the page. How can I assist you?";
 const chatSession = new ChatSession();
+let disabledInteraction = false;
 let pageContent: string | undefined;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -57,20 +58,6 @@ function setupInput() {
   userInput.addEventListener("input", resizeInputHeight);
 }
 
-function setupKeyboardShortcuts() {
-  const userInput = document.getElementById(
-    "user-input"
-  ) as HTMLTextAreaElement;
-  userInput.addEventListener("keydown", (event) => {
-    if (event.key == "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      if (userInput.value.trim()) {
-        agentCompletion(AgentType.DocumentAgent, userInput.value.trim());
-      }
-    }
-  });
-}
-
 function setupSendButton() {
   const userInput = document.getElementById(
     "user-input"
@@ -80,7 +67,7 @@ function setupSendButton() {
   ) as HTMLButtonElement;
 
   sendButton.addEventListener("click", () => {
-    if (userInput.value.trim()) {
+    if (!disabledInteraction && userInput.value.trim()) {
       agentCompletion(AgentType.DocumentAgent, userInput.value.trim());
     }
   });
@@ -90,6 +77,20 @@ function setupSendButton() {
       sendButton.classList.remove("inactive");
     } else {
       sendButton.classList.add("inactive");
+    }
+  });
+}
+
+function setupKeyboardShortcuts() {
+  const userInput = document.getElementById(
+    "user-input"
+  ) as HTMLTextAreaElement;
+  userInput.addEventListener("keydown", (event) => {
+    if (event.key == "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      if (!disabledInteraction && userInput.value.trim()) {
+        agentCompletion(AgentType.DocumentAgent, userInput.value.trim());
+      }
     }
   });
 }
@@ -128,6 +129,7 @@ function agentCompletion(type: AgentType, message: string) {
 
   getAgent(type, pageContent, (agent) => {
     if (agent) {
+      disabledInteraction = true;
       agent
         .generate(chatSession.getModelVisibleMessages(), 5000)
         .then(async (result) => {
@@ -145,6 +147,9 @@ function agentCompletion(type: AgentType, message: string) {
             userVisible: true,
             modelVisible: false,
           });
+        })
+        .finally(() => {
+          disabledInteraction = false;
         });
     } else {
       chrome.runtime.openOptionsPage();

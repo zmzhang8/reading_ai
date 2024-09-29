@@ -2,6 +2,7 @@ import DOMPurify from "dompurify";
 import { marked } from "marked";
 import { AgentType, getAgent } from "./utils/agent_helper";
 
+let disabledInteraction = false;
 let aiQuery = "";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -51,16 +52,21 @@ function setupInput() {
   const lookupInput = document.getElementById(
     "lookup-input"
   ) as HTMLInputElement;
+  lookupInput.addEventListener("input", updateLookupButtonStatus);
+}
+
+function updateLookupButtonStatus() {
+  const lookupInput = document.getElementById(
+    "lookup-input"
+  ) as HTMLInputElement;
   const lookupButton = document.getElementById(
     "lookup-button"
   ) as HTMLButtonElement;
-  lookupInput.addEventListener("input", () => {
-    if (lookupInput.value.trim()) {
-      lookupButton.classList.remove("inactive");
-    } else {
-      lookupButton.classList.add("inactive");
-    }
-  });
+  if (lookupInput.value.trim()) {
+    lookupButton.classList.remove("inactive");
+  } else {
+    lookupButton.classList.add("inactive");
+  }
 }
 
 function setupLookupButton() {
@@ -72,7 +78,7 @@ function setupLookupButton() {
   ) as HTMLButtonElement;
 
   lookupButton.addEventListener("click", () => {
-    if (lookupInput.value.trim()) {
+    if (!disabledInteraction && lookupInput.value.trim()) {
       agentCompletion(lookupInput.value.trim());
     }
   });
@@ -93,7 +99,7 @@ function setupKeyboardShortcuts(tabId: number) {
   lookupInput.addEventListener("keydown", (event) => {
     if (event.key == "Enter" && !event.shiftKey) {
       event.preventDefault();
-      if (lookupInput.value.trim()) {
+      if (!disabledInteraction && lookupInput.value.trim()) {
         agentCompletion(lookupInput.value.trim());
       }
     } else if (event.key == "Enter" && event.shiftKey) {
@@ -115,6 +121,7 @@ function agentCompletion(text: string) {
   lookupResult.innerHTML = "";
   getAgent(AgentType.LanguageAgent, text, (agent) => {
     if (agent) {
+      disabledInteraction = true;
       loaderContainer.classList.remove("hidden");
       agent
         .generate([], 3000)
@@ -126,6 +133,9 @@ function agentCompletion(text: string) {
         .catch((reason) => {
           loaderContainer.classList.add("hidden");
           lookupResult.textContent = reason.toString();
+        })
+        .finally(() => {
+          disabledInteraction = false;
         });
     } else {
       chrome.runtime.openOptionsPage();
