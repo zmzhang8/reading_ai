@@ -1,4 +1,3 @@
-import { options } from "marked";
 import { ChatRole } from "./chat_models/chat_model";
 import { createChatModel } from "./utils/model_helper";
 import {
