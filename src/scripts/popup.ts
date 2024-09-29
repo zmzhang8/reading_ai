@@ -31,10 +31,6 @@ document.addEventListener("DOMContentLoaded", () => {
               document.getElementById("lookup-input") as HTMLInputElement
             ).value = selectedContent;
             setupAndLookup(selectedContent);
-          } else {
-            (
-              document.getElementById("lookup-input") as HTMLInputElement
-            ).focus();
           }
         }
       );
@@ -96,12 +92,14 @@ function setupKeyboardShortcuts(tabId: number) {
   const lookupInput = document.getElementById(
     "lookup-input"
   ) as HTMLInputElement;
-  lookupInput.addEventListener("keyup", (event) => {
+  lookupInput.addEventListener("keydown", (event) => {
     if (event.key == "Enter" && !event.shiftKey) {
+      event.preventDefault();
       if (lookupInput.value.trim()) {
         setupAndLookup(lookupInput.value.trim());
       }
     } else if (event.key == "Enter" && event.shiftKey) {
+      event.preventDefault();
       aiQuery = lookupInput.value.trim();
       openSidePanel(tabId);
     }
