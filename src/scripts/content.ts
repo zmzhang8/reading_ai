@@ -1,4 +1,6 @@
 import { Readability } from "@mozilla/readability";
+import DOMPurify from "dompurify";
+import TurndownService from "turndown";
 
 chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
   if (message.action === "getSelectedContent") {
@@ -7,7 +9,12 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
   } else if (message.action === "getReadableContent") {
     const documentClone = document.cloneNode(true) as Document;
     const article = new Readability(documentClone).parse();
-    const readableContent = article?.content ?? "";
-    sendResponse(readableContent);
+    const readableContentHTML = article?.content
+      ? DOMPurify.sanitize(article?.content)
+      : "";
+    const readableContentMarkdown = new TurndownService().turndown(
+      readableContentHTML
+    );
+    sendResponse(readableContentMarkdown);
   }
 });

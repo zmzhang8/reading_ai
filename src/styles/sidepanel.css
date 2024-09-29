@@ -8,6 +8,17 @@ body {
   height: 100vh;
 }
 
+code {
+  display: block;
+  background-color: #222222;
+  color: #f8f8f2;
+  padding: 10px;
+  margin: 4px 0;
+  border-radius: 10px;
+  font-family: "Fira Code", Consolas, "Courier New", monospace;
+  white-space: pre-wrap;
+}
+
 .chat-container {
   width: calc(100% - 10px);
   height: calc(100% - 10px);
@@ -27,19 +38,24 @@ body {
   margin-bottom: 20px;
   padding: 8px 12px;
   border-radius: 20px;
-  white-space: pre-wrap;
+  white-space: normal;
   word-wrap: break-word;
   font-size: 16px;
   line-height: 1.5;
 }
 
+.message p {
+  margin: 0;
+}
+
 .user-message {
-  background-color: #f1f0f0;
-  color: black;
+  background-color: #3178c6;
+  color: white;
   align-self: flex-start;
 }
 
 .ai-message {
+  background-color: #f1f0f0;
   color: black;
   align-self: flex-start;
 }

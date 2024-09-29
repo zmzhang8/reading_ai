@@ -5,11 +5,15 @@ export interface Options {
   apiKey: string;
 }
 
-export function loadOptionsFromStorage(callback: (options: Options) => void) {
+export function loadOptionsFromStorage(callback: (options?: Options) => void) {
   chrome.storage.local.get(
     ["language", "provider", "model", "apiKey"],
     (result) => {
-      callback(result as Options);
+      if (chrome.runtime.lastError) {
+        callback();
+      } else {
+        callback(result as Options);
+      }
     }
   );
 }

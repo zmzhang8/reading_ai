@@ -90,17 +90,21 @@ function updateAPIUrls() {
 
 function loadSavedOptions() {
   loadOptionsFromStorage((options) => {
-    if (options.apiKey) {
-      (document.getElementById("option-language") as HTMLSelectElement).value =
-        options.language;
-      (document.getElementById("option-provider") as HTMLSelectElement).value =
-        options.provider;
-      updateModelOptions();
-      updateAPIUrls();
-      (document.getElementById("option-model") as HTMLSelectElement).value =
-        options.model;
-      (document.getElementById("option-api-key") as HTMLInputElement).value =
-        options.apiKey;
+    if (options) {
+      if (options.apiKey) {
+        (
+          document.getElementById("option-language") as HTMLSelectElement
+        ).value = options.language;
+        (
+          document.getElementById("option-provider") as HTMLSelectElement
+        ).value = options.provider;
+        updateModelOptions();
+        updateAPIUrls();
+        (document.getElementById("option-model") as HTMLSelectElement).value =
+          options.model;
+        (document.getElementById("option-api-key") as HTMLInputElement).value =
+          options.apiKey;
+      }
     }
   });
 }

@@ -1,3 +1,15 @@
+import { marked } from "marked";
+import { ChatRole } from "./chat_models/chat_model";
+import { AgentType, getAgent } from "./utils/agent_helper";
+import { ChatMessage, ChatSession } from "./utils/chat_session";
+import DOMPurify from "dompurify";
+
+const greetingsWithPage = "I have read the page. How can I assist you?";
+const greetingsWithoutPage =
+  "I'm unable to read the page. How can I assist you?";
+const chatSession = new ChatSession();
+let pageContent: string | undefined;
+
 document.addEventListener("DOMContentLoaded", () => {
   setupInput();
   setupSendButton();
@@ -9,11 +21,17 @@ document.addEventListener("DOMContentLoaded", () => {
         tab.id,
         { action: "getReadableContent" },
         (readableContent: string) => {
-          console.log("Received readableContent");
+          pageContent = readableContent;
+          addMessage({
+            role: ChatRole.Model,
+            content: readableContent ? greetingsWithPage : greetingsWithoutPage,
+            userVisible: true,
+            modelVisible: false,
+          });
 
           chrome.runtime.sendMessage({ action: "getAIQuery" }, (query) => {
             if (query) {
-              sendMessage(query);
+              agentCompletion(AgentType.DocumentAgent, query);
             }
           });
         }
@@ -47,7 +65,7 @@ function setupKeyboardShortcuts() {
     if (event.key == "Enter" && !event.shiftKey) {
       event.preventDefault();
       if (userInput.value.trim()) {
-        sendMessage(userInput.value.trim());
+        agentCompletion(AgentType.DocumentAgent, userInput.value.trim());
       }
     }
   });
@@ -63,7 +81,7 @@ function setupSendButton() {
 
   sendButton.addEventListener("click", () => {
     if (userInput.value.trim()) {
-      sendMessage(userInput.value.trim());
+      agentCompletion(AgentType.DocumentAgent, userInput.value.trim());
     }
   });
 
@@ -76,27 +94,56 @@ function setupSendButton() {
   });
 }
 
-function sendMessage(message: string) {
+async function addMessage(message: ChatMessage) {
+  chatSession.addMessage(message);
+  if (message.userVisible) {
+    const content = DOMPurify.sanitize(await marked(message.content));
+    const chatMessages = document.getElementById(
+      "chat-messages"
+    ) as HTMLDivElement;
+    const messageElement = document.createElement("div");
+    messageElement.classList.add("message");
+    messageElement.classList.add(
+      message.role == ChatRole.User ? "user-message" : "ai-message"
+    );
+    messageElement.innerHTML = content;
+    chatMessages.appendChild(messageElement);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+}
+
+function agentCompletion(type: AgentType, message: string) {
   const userInput = document.getElementById(
     "user-input"
   ) as HTMLTextAreaElement;
-  addMessage(message, true);
   userInput.value = "";
   resizeInputHeight();
 
-  setTimeout(() => {
-    addMessage("Received your message.", false);
-  }, 1000);
-}
+  addMessage({
+    role: ChatRole.User,
+    content: message,
+    userVisible: true,
+    modelVisible: true,
+  });
 
-function addMessage(message: string, isUser: boolean) {
-  const chatMessages = document.getElementById(
-    "chat-messages"
-  ) as HTMLDivElement;
-  const messageElement = document.createElement("div");
-  messageElement.classList.add("message");
-  messageElement.classList.add(isUser ? "user-message" : "ai-message");
-  messageElement.textContent = message;
-  chatMessages.appendChild(messageElement);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
+  getAgent(type, pageContent, (agent) => {
+    agent
+      ?.generate(chatSession.getModelVisibleMessages(), 5000)
+      .then(async (result) => {
+        addMessage({
+          role: ChatRole.Model,
+          content: result,
+          userVisible: true,
+          modelVisible: true,
+        });
+      })
+      .catch((reason) => {
+        addMessage({
+          role: ChatRole.Model,
+          content: reason.toString(),
+          userVisible: true,
+          modelVisible: false,
+        });
+      });
+  });
 }
