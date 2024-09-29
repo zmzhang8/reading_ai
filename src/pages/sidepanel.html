@@ -1,12 +1,32 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Reading AI</title>
+    <link rel="stylesheet" href="styles/sidepanel.css" />
   </head>
-
   <body>
-    <div id="aiQuery"></div>
-    <div id="readingMode"></div>
+    <div class="chat-container">
+      <div class="chat-messages" id="chat-messages"></div>
+
+      <div class="input-container">
+        <textarea
+          id="user-input"
+          rows="1"
+          placeholder="Enter message"
+        ></textarea>
+
+        <button id="send-button" title="Send message (Enter)">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+            <path
+              d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+
     <script src="sidepanel.js"></script>
   </body>
 </html>

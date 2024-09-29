@@ -9,12 +9,7 @@ let aiQuery = "";
 document.addEventListener("DOMContentLoaded", () => {
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "getAIQuery") {
-      if (aiQuery) {
-        sendResponse(
-          (document.getElementById("lookup-input") as HTMLInputElement).value
-        );
-        aiQuery = "";
-      }
+      sendResponse(aiQuery);
       window.close();
     }
   });
