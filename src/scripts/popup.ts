@@ -35,6 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
               (
                 document.getElementById("lookup-input") as HTMLInputElement
               ).value = selectedContent;
+              updateLookupButtonStatus();
               agentCompletion(selectedContent);
             }
           }
@@ -42,6 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     } else {
       (document.getElementById("lookup-input") as HTMLInputElement).focus();
+      updateLookupButtonStatus();
     }
   });
 });

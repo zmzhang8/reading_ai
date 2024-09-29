@@ -72,6 +72,20 @@ function setupInput() {
   userInput.addEventListener("input", resizeInputHeight);
 }
 
+function updateSendButtonStatus() {
+  const userInput = document.getElementById(
+    "user-input"
+  ) as HTMLTextAreaElement;
+  const sendButton = document.getElementById(
+    "send-button"
+  ) as HTMLButtonElement;
+  if (userInput.value.trim()) {
+    sendButton.classList.remove("inactive");
+  } else {
+    sendButton.classList.add("inactive");
+  }
+}
+
 function setupSendButton() {
   const userInput = document.getElementById(
     "user-input"
@@ -86,13 +100,7 @@ function setupSendButton() {
     }
   });
 
-  userInput.addEventListener("input", () => {
-    if (userInput.value.trim()) {
-      sendButton.classList.remove("inactive");
-    } else {
-      sendButton.classList.add("inactive");
-    }
-  });
+  userInput.addEventListener("input", updateSendButtonStatus);
 }
 
 function setupKeyboardShortcuts() {
@@ -133,6 +141,7 @@ function agentCompletion(type: AgentType, message: string) {
   ) as HTMLTextAreaElement;
 
   userInput.value = "";
+  updateSendButtonStatus();
   resizeInputHeight();
   addMessage({
     role: ChatRole.User,
