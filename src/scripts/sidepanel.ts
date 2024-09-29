@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   setupInput();
-  setupKeyboardShortcuts();
   setupSendButton();
+  setupKeyboardShortcuts();
 
   chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
     if (tab.id) {

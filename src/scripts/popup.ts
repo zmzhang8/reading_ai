@@ -7,6 +7,9 @@ import { loadOptionsFromStorage, LANGUAGES } from "./utils/options";
 let aiQuery = "";
 
 document.addEventListener("DOMContentLoaded", () => {
+  setupInput();
+  setupLookupButton();
+
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "getAIQuery") {
       sendResponse(aiQuery);
@@ -16,8 +19,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
     if (tab.id) {
-      setupKeyboardShortcuts(tab.id);
       setupAIButton(tab.id);
+      setupKeyboardShortcuts(tab.id);
 
       chrome.tabs.sendMessage(
         tab.id,
@@ -39,8 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
       (document.getElementById("lookup-input") as HTMLInputElement).focus();
     }
   });
-
-  setupLookupButton();
 });
 
 async function openSidePanel(tabId: number) {
@@ -50,6 +51,45 @@ async function openSidePanel(tabId: number) {
     enabled: true,
   });
   await chrome.sidePanel.open({ tabId: tabId });
+}
+
+function setupInput() {
+  const lookupInput = document.getElementById(
+    "lookup-input"
+  ) as HTMLInputElement;
+  const lookupButton = document.getElementById(
+    "lookup-button"
+  ) as HTMLButtonElement;
+  lookupInput.addEventListener("input", () => {
+    if (lookupInput.value.trim()) {
+      lookupButton.classList.remove("inactive");
+    } else {
+      lookupButton.classList.add("inactive");
+    }
+  });
+}
+
+function setupLookupButton() {
+  const lookupInput = document.getElementById(
+    "lookup-input"
+  ) as HTMLInputElement;
+  const lookupButton = document.getElementById(
+    "lookup-button"
+  ) as HTMLButtonElement;
+
+  lookupButton.addEventListener("click", () => {
+    if (lookupInput.value.trim()) {
+      setupAndLookup(lookupInput.value.trim());
+    }
+  });
+}
+
+function setupAIButton(tabId: number) {
+  const aiButton = document.getElementById("ai-button") as HTMLButtonElement;
+  aiButton.addEventListener("click", () => {
+    openSidePanel(tabId);
+    window.close();
+  });
 }
 
 function setupKeyboardShortcuts(tabId: number) {
@@ -64,35 +104,6 @@ function setupKeyboardShortcuts(tabId: number) {
     } else if (event.key == "Enter" && event.shiftKey) {
       aiQuery = lookupInput.value.trim();
       openSidePanel(tabId);
-    }
-  });
-}
-
-function setupAIButton(tabId: number) {
-  const aiButton = document.getElementById("ai-button") as HTMLButtonElement;
-  aiButton.addEventListener("click", () => {
-    openSidePanel(tabId);
-    window.close();
-  });
-}
-
-function setupLookupButton() {
-  const lookupInput = document.getElementById(
-    "lookup-input"
-  ) as HTMLInputElement;
-  const lookupButton = document.getElementById(
-    "lookup-button"
-  ) as HTMLButtonElement;
-
-  lookupInput.addEventListener("input", () => {
-    if (lookupInput.value.trim()) {
-      lookupButton.addEventListener("click", () => {
-        setupAndLookup(lookupInput.value.trim());
-      });
-      lookupButton.classList.remove("inactive");
-    } else {
-      lookupButton.classList.add("inactive");
-      lookupButton.removeEventListener("click", () => {});
     }
   });
 }
