@@ -22,6 +22,13 @@ document.addEventListener("DOMContentLoaded", () => {
         tab.id,
         { action: "getReadableContent" },
         (readableContent: string) => {
+          if (chrome.runtime.lastError) {
+            console.error(
+              "Error getting readable content: ",
+              chrome.runtime.lastError.message
+            );
+          }
+
           pageContent = readableContent;
           addMessage({
             role: ChatRole.Model,
@@ -31,8 +38,15 @@ document.addEventListener("DOMContentLoaded", () => {
           });
 
           chrome.runtime.sendMessage({ action: "getAIQuery" }, (query) => {
-            if (query) {
-              agentCompletion(AgentType.DocumentAgent, query);
+            if (chrome.runtime.lastError) {
+              console.error(
+                "Error getting ai query: ",
+                chrome.runtime.lastError.message
+              );
+            } else {
+              if (query) {
+                agentCompletion(AgentType.DocumentAgent, query);
+              }
             }
           });
         }

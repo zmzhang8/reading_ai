@@ -25,11 +25,18 @@ document.addEventListener("DOMContentLoaded", () => {
         tab.id,
         { action: "getSelectedContent" },
         (selectedContent: string) => {
-          if (selectedContent) {
-            (
-              document.getElementById("lookup-input") as HTMLInputElement
-            ).value = selectedContent;
-            agentCompletion(selectedContent);
+          if (chrome.runtime.lastError) {
+            console.error(
+              "Error getting selected content: ",
+              chrome.runtime.lastError.message
+            );
+          } else {
+            if (selectedContent) {
+              (
+                document.getElementById("lookup-input") as HTMLInputElement
+              ).value = selectedContent;
+              agentCompletion(selectedContent);
+            }
           }
         }
       );
