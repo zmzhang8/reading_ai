@@ -32,7 +32,7 @@ export class DuckDuckGoChatModel implements ChatModel {
         headers: { "x-vqd-4": vqd, "Content-Type": "application/json" },
         method: "POST",
         body: JSON.stringify({
-          model: "gpt-4o-mini",
+          model: this.options.modelName,
           messages: contents,
         }),
       },
