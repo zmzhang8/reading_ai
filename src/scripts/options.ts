@@ -42,10 +42,10 @@ function populateProvidersAndModels() {
   }
 
   updateModelOptions();
-  updateAPIUrls();
+  updateAPIOptions();
   providerSelect.addEventListener("change", () => {
     updateModelOptions();
-    updateAPIUrls();
+    updateAPIOptions();
   });
 }
 
@@ -69,41 +69,49 @@ function updateModelOptions() {
   }
 }
 
-function updateAPIUrls() {
+function updateAPIOptions() {
   const providerSelect = document.getElementById(
     "option-provider"
   ) as HTMLSelectElement;
-  const apiKeyUrl = document.getElementById("api-key-url") as HTMLAnchorElement;
-  const apiPricingUrl = document.getElementById(
-    "api-pricing-url"
-  ) as HTMLAnchorElement;
-  const googleFreeTierText = document.getElementById(
-    "google-free-tier-text"
-  ) as HTMLSpanElement;
+  const apiKeyOptionGroup = document.getElementById(
+    "option-group-api-key"
+  ) as HTMLDivElement;
+  if (providerSelect.value === "Default") {
+    apiKeyOptionGroup.classList.add("hidden");
+  } else {
+    const apiKeyUrl = document.getElementById(
+      "api-key-url"
+    ) as HTMLAnchorElement;
+    const apiPricingUrl = document.getElementById(
+      "api-pricing-url"
+    ) as HTMLAnchorElement;
+    const googleFreeTierText = document.getElementById(
+      "google-free-tier-text"
+    ) as HTMLSpanElement;
 
-  const selectedProvider = providerSelect.value;
-  apiKeyUrl.href = PROVIDERS_TO_API_KEY_URL[selectedProvider];
-  apiPricingUrl.href = PROVIDERS_TO_API_PRICING_URL[selectedProvider];
-  googleFreeTierText.className = selectedProvider === "Google" ? "" : "hidden";
+    const selectedProvider = providerSelect.value;
+    apiKeyUrl.href = PROVIDERS_TO_API_KEY_URL[selectedProvider];
+    apiPricingUrl.href = PROVIDERS_TO_API_PRICING_URL[selectedProvider];
+    googleFreeTierText.className =
+      selectedProvider === "Google" ? "" : "hidden";
+
+    apiKeyOptionGroup.classList.remove("hidden");
+  }
 }
 
 function loadSavedOptions() {
   loadOptionsFromStorage((options) => {
     if (options) {
-      if (options.apiKey) {
-        (
-          document.getElementById("option-language") as HTMLSelectElement
-        ).value = options.language;
-        (
-          document.getElementById("option-provider") as HTMLSelectElement
-        ).value = options.provider;
-        updateModelOptions();
-        updateAPIUrls();
-        (document.getElementById("option-model") as HTMLSelectElement).value =
-          options.model;
-        (document.getElementById("option-api-key") as HTMLInputElement).value =
-          options.apiKey;
-      }
+      (document.getElementById("option-language") as HTMLSelectElement).value =
+        options.language;
+      (document.getElementById("option-provider") as HTMLSelectElement).value =
+        options.provider;
+      updateModelOptions();
+      updateAPIOptions();
+      (document.getElementById("option-model") as HTMLSelectElement).value =
+        options.model;
+      (document.getElementById("option-api-key") as HTMLInputElement).value =
+        options.apiKey ?? "";
     }
   });
 }
@@ -121,7 +129,7 @@ function saveOptions() {
     document.getElementById("option-api-key") as HTMLInputElement
   ).value.trim();
 
-  if (apiKey) {
+  if (apiKey || provider === "Default") {
     testModelConnection(provider, model, apiKey)
       .then(() => {
         saveOptionsToStorage(

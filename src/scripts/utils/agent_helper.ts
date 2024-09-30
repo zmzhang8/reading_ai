@@ -1,9 +1,9 @@
+import { Agent } from "../agents/agent";
 import { ChatModel } from "../chat_models/chat_model";
 import { createChatModel } from "./model_helper";
-import { Agent } from "../agents/agent";
 import { DocumentAgent } from "../agents/document_agent";
 import { LanguageAgent } from "../agents/language_agent";
-import { loadOptionsFromStorage, Options } from "./options";
+import { DEFAULT_OPTIONS, loadOptionsFromStorage, Options } from "./options";
 
 let language: string;
 let model: ChatModel;
@@ -23,16 +23,22 @@ export function getAgent(
     callback?.(agent);
   } else {
     loadOptionsFromStorage((options) => {
-      if (options && options.apiKey) {
+      if (options) {
         language = options.language;
         model = createChatModel(options.provider, {
-          apiKey: options.apiKey,
+          apiKey: options.apiKey ?? "",
           modelName: options.model,
         });
         const agent = createAgent(type, document);
         callback?.(agent);
       } else {
-        callback?.();
+        language = DEFAULT_OPTIONS.language;
+        model = createChatModel(DEFAULT_OPTIONS.provider, {
+          apiKey: "",
+          modelName: DEFAULT_OPTIONS.model,
+        });
+        const agent = createAgent(type, document);
+        callback?.(agent);
       }
     });
   }

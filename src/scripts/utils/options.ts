@@ -2,7 +2,7 @@ export interface Options {
   language: string;
   provider: string;
   model: string;
-  apiKey: string;
+  apiKey?: string;
 }
 
 export function loadOptionsFromStorage(callback: (options?: Options) => void) {
@@ -21,6 +21,12 @@ export function loadOptionsFromStorage(callback: (options?: Options) => void) {
 export function saveOptionsToStorage(options: Options, callback: () => void) {
   chrome.storage.local.set(options, callback);
 }
+
+export const DEFAULT_OPTIONS: Options = {
+  language: "en",
+  provider: "Default",
+  model: "gpt-4o-mini",
+};
 
 export const LANGUAGES: Readonly<{ [key: string]: string }> = {
   en: "English",
@@ -41,6 +47,9 @@ export const LANGUAGES: Readonly<{ [key: string]: string }> = {
 export const PROVIDERS_TO_MODELS: Readonly<{
   [key: string]: Readonly<{ [key: string]: string }>;
 }> = {
+  Default: {
+    "gpt-4o-mini": "gpt-4o-mini",
+  },
   Google: {
     "gemini-1.5-flash": "gemini-1.5-flash (fast for everyday use)",
     "gemini-1.5-pro": "gemini-1.5-pro (great for complex use)",
