@@ -160,7 +160,6 @@ function agentCompletion(type: AgentType, message: string) {
       agent
         .generate(chatSession.getModelVisibleMessages(), 5000)
         .then(async (result) => {
-          loaderContainer.classList.add("hidden");
           addMessage({
             role: ChatRole.Model,
             content: result,
@@ -169,19 +168,24 @@ function agentCompletion(type: AgentType, message: string) {
           });
         })
         .catch((reason) => {
-          loaderContainer.classList.add("hidden");
-          addMessage({
-            role: ChatRole.Model,
-            content: reason.toString(),
-            userVisible: true,
-            modelVisible: false,
-          });
+          showErrorMessage(reason.toString());
         })
         .finally(() => {
+          loaderContainer.classList.add("hidden");
           disabledInteraction = false;
         });
     } else {
       chrome.runtime.openOptionsPage();
     }
   });
+}
+
+function showErrorMessage(text: string) {
+  const errorMessage = document.getElementById("error-message") as HTMLDivElement;
+  errorMessage.textContent = text;
+  errorMessage.classList.remove("hidden");
+  setTimeout(() => {
+    errorMessage.textContent = "";
+    errorMessage.classList.add("hidden");
+  }, 5000);
 }

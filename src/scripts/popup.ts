@@ -135,19 +135,28 @@ function agentCompletion(text: string) {
       agent
         .generate([], 5000)
         .then(async (result) => {
-          loaderContainer.classList.add("hidden");
           const htmlString = DOMPurify.sanitize(await marked(result));
           lookupResult.innerHTML = htmlString;
         })
         .catch((reason) => {
-          loaderContainer.classList.add("hidden");
-          lookupResult.textContent = reason.toString();
+          showErrorMessage(reason.toString());
         })
         .finally(() => {
+          loaderContainer.classList.add("hidden");
           disabledInteraction = false;
         });
     } else {
       chrome.runtime.openOptionsPage();
     }
   });
+}
+
+function showErrorMessage(text: string) {
+  const errorMessage = document.getElementById("error-message") as HTMLDivElement;
+  errorMessage.textContent = text;
+  errorMessage.classList.remove("hidden");
+  setTimeout(() => {
+    errorMessage.textContent = "";
+    errorMessage.classList.add("hidden");
+  }, 5000);
 }

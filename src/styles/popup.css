@@ -90,15 +90,31 @@ button.inactive svg {
   }
 }
 
+#error-message {
+  background-color: #f2dede;
+  color: #a94442;
+  word-wrap: break-word;
+  overflow-y: auto;
+  max-height: 400px;
+  font-size: 14px;
+  border-radius: 10px;
+  margin: 10px 0;
+  padding: 10px;
+}
+
+#error-message.hidden {
+  display: none;
+}
+
 #lookup-result {
   flex-grow: 1;
   overflow-y: auto;
   max-height: 400px;
   font-size: 14px;
-  color: #333;
   padding-right: 10px;
 }
 
 #lookup-result p {
   margin: 5px 0;
 }
+
