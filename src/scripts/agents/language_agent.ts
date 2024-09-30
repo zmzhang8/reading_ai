@@ -24,7 +24,10 @@ export class LanguageAgent implements Agent {
 
     const result = await this.model.generate(
       [{ role: ChatRole.User, content: userPrompt }],
-      systemPrompt
+      systemPrompt,
+      {
+        timeoutMs: timeoutMs,
+      }
     );
     return this.cleanOutput(result);
   }
