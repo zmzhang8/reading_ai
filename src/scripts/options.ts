@@ -137,7 +137,7 @@ function saveOptions() {
             language: language,
             provider: provider,
             model: model,
-            apiKey: apiKey,
+            apiKey: provider === "Default" ? "": apiKey,
           },
           () => {
             window.close();
