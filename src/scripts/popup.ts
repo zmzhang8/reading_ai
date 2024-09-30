@@ -133,7 +133,7 @@ function agentCompletion(text: string) {
       disabledInteraction = true;
       loaderContainer.classList.remove("hidden");
       agent
-        .generate([], 3000)
+        .generate([], 5000)
         .then(async (result) => {
           loaderContainer.classList.add("hidden");
           const htmlString = DOMPurify.sanitize(await marked(result));
