@@ -106,12 +106,12 @@ function setupKeyboardShortcuts(tabId: number) {
     "lookup-input"
   ) as HTMLInputElement;
   lookupInput.addEventListener("keydown", (event) => {
-    if (event.key == "Enter" && !event.shiftKey) {
+    if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       if (!disabledInteraction && lookupInput.value.trim()) {
         agentCompletion(lookupInput.value.trim());
       }
-    } else if (event.key == "Enter" && event.shiftKey) {
+    } else if (event.key === "Enter" && event.shiftKey) {
       event.preventDefault();
       aiQuery = lookupInput.value.trim();
       openSidePanel(tabId);

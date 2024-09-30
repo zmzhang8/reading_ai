@@ -108,7 +108,7 @@ function setupKeyboardShortcuts() {
     "user-input"
   ) as HTMLTextAreaElement;
   userInput.addEventListener("keydown", (event) => {
-    if (event.key == "Enter" && !event.shiftKey) {
+    if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       if (!disabledInteraction && userInput.value.trim()) {
         agentCompletion(AgentType.DocumentAgent, userInput.value.trim());
@@ -127,7 +127,7 @@ async function addMessage(message: ChatMessage) {
     const messageElement = document.createElement("div");
     messageElement.classList.add("message");
     messageElement.classList.add(
-      message.role == ChatRole.User ? "user-message" : "ai-message"
+      message.role === ChatRole.User ? "user-message" : "ai-message"
     );
     messageElement.innerHTML = content;
     chatMessages.appendChild(messageElement);
