@@ -1,6 +1,6 @@
-# Reading AI
+# Reading AI (Chrome Extension)
 
-AI assistant tool in your browser. Free and open source.
+AI assistant in your browser. Free and open source.
 
 ## Features
 - Dictionary
