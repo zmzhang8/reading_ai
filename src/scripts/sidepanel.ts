@@ -136,6 +136,9 @@ async function addMessage(message: ChatMessage) {
 }
 
 function agentCompletion(type: AgentType, message: string) {
+  const loaderContainer = document.getElementById(
+    "loader-container"
+  ) as HTMLDivElement;
   const userInput = document.getElementById(
     "user-input"
   ) as HTMLTextAreaElement;
@@ -153,9 +156,11 @@ function agentCompletion(type: AgentType, message: string) {
   getAgent(type, pageContent, (agent) => {
     if (agent) {
       disabledInteraction = true;
+      loaderContainer.classList.remove("hidden");
       agent
         .generate(chatSession.getModelVisibleMessages(), 5000)
         .then(async (result) => {
+          loaderContainer.classList.add("hidden");
           addMessage({
             role: ChatRole.Model,
             content: result,
@@ -164,6 +169,7 @@ function agentCompletion(type: AgentType, message: string) {
           });
         })
         .catch((reason) => {
+          loaderContainer.classList.add("hidden");
           addMessage({
             role: ChatRole.Model,
             content: reason.toString(),
