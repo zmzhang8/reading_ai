@@ -48,7 +48,7 @@ export const PROVIDERS_TO_MODELS: Readonly<{
   [key: string]: Readonly<{ [key: string]: string }>;
 }> = {
   Default: {
-    "gpt-4o-mini": "gpt-4o-mini (for testing)",
+    "gpt-4o-mini": "gpt-4o-mini (for limited testing use)",
   },
   Google: {
     "gemini-1.5-flash": "gemini-1.5-flash (fast for everyday use)",
