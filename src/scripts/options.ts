@@ -7,6 +7,7 @@ import {
   PROVIDERS_TO_API_PRICING_URL,
   loadOptionsFromStorage,
   saveOptionsToStorage,
+  DEFAULT_OPTIONS,
 } from "./utils/options";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -101,7 +102,7 @@ function updateAPIOptions() {
 
 function loadSavedOptions() {
   loadOptionsFromStorage((options) => {
-    if (options) {
+    if (options?.language) {
       (document.getElementById("option-language") as HTMLSelectElement).value =
         options.language;
       (document.getElementById("option-provider") as HTMLSelectElement).value =
@@ -112,6 +113,15 @@ function loadSavedOptions() {
         options.model;
       (document.getElementById("option-api-key") as HTMLInputElement).value =
         options.apiKey ?? "";
+    } else {
+      (document.getElementById("option-language") as HTMLSelectElement).value =
+        DEFAULT_OPTIONS.language;
+      (document.getElementById("option-provider") as HTMLSelectElement).value =
+        DEFAULT_OPTIONS.provider;
+      updateModelOptions();
+      updateAPIOptions();
+      (document.getElementById("option-model") as HTMLSelectElement).value =
+        DEFAULT_OPTIONS.model;
     }
   });
 }
@@ -137,7 +147,7 @@ function saveOptions() {
             language: language,
             provider: provider,
             model: model,
-            apiKey: provider === "Default" ? "": apiKey,
+            apiKey: provider === "Default" ? "" : apiKey,
           },
           () => {
             window.close();
