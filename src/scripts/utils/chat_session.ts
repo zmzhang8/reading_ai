@@ -21,4 +21,8 @@ export class ChatSession {
       return value.modelVisible;
     });
   }
+
+  count (): number {
+    return this.messages.length;
+  }
 }

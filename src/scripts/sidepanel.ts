@@ -3,6 +3,7 @@ import { marked } from "marked";
 import { ChatRole } from "./chat_models/chat_model";
 import { AgentType, getAgent } from "./utils/agent_helper";
 import { ChatMessage, ChatSession } from "./utils/chat_session";
+import { PROMPTS } from "./utils/prompts";
 
 const greetingsWithPage = "I have read the page. How can I assist you?";
 const greetingsWithoutPage =
@@ -15,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupInput();
   setupSendButton();
   setupKeyboardShortcuts();
+  setupQuickMessages();
 
   chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
     if (tab.id) {
@@ -69,7 +71,11 @@ function setupInput() {
   const userInput = document.getElementById(
     "user-input"
   ) as HTMLTextAreaElement;
-  userInput.addEventListener("input", resizeInputHeight);
+  userInput.addEventListener("input", () => {
+    resizeInputHeight();
+    updateSendButtonStatus();
+    updateQuickMessagesStatus();
+  });
 }
 
 function updateSendButtonStatus() {
@@ -99,8 +105,6 @@ function setupSendButton() {
       agentCompletion(AgentType.DocumentAgent, userInput.value.trim());
     }
   });
-
-  userInput.addEventListener("input", updateSendButtonStatus);
 }
 
 function setupKeyboardShortcuts() {
@@ -115,6 +119,42 @@ function setupKeyboardShortcuts() {
       }
     }
   });
+}
+
+function updateQuickMessagesStatus() {
+  const quickMessageContainer = document.getElementById(
+    "quick-message-container"
+  ) as HTMLDivElement;
+  const userInput = document.getElementById(
+    "user-input"
+  ) as HTMLTextAreaElement;
+  if (userInput.value.trim() || chatSession.count() > 1) {
+    quickMessageContainer.classList.add("hidden");
+  } else {
+    quickMessageContainer.classList.remove("hidden");
+  }
+}
+
+function setupQuickMessages() {
+  const quickMessageContainer = document.getElementById(
+    "quick-message-container"
+  ) as HTMLDivElement;
+  const userInput = document.getElementById(
+    "user-input"
+  ) as HTMLTextAreaElement;
+  for (const [name, prompt] of Object.entries(PROMPTS)) {
+    const button = document.createElement("button");
+    button.value = name;
+    button.textContent = name;
+    button.classList.add("quick-message-button");
+    button.addEventListener("click", () => {
+      userInput.value = prompt;
+      updateSendButtonStatus();
+      resizeInputHeight();
+      updateQuickMessagesStatus();
+    });
+    quickMessageContainer.appendChild(button);
+  }
 }
 
 async function addMessage(message: ChatMessage) {
@@ -152,6 +192,7 @@ function agentCompletion(type: AgentType, message: string) {
     userVisible: true,
     modelVisible: true,
   });
+  updateQuickMessagesStatus();
 
   getAgent(type, pageContent, (agent) => {
     if (agent) {
@@ -181,7 +222,9 @@ function agentCompletion(type: AgentType, message: string) {
 }
 
 function showErrorMessage(text: string) {
-  const errorMessage = document.getElementById("error-message") as HTMLDivElement;
+  const errorMessage = document.getElementById(
+    "error-message"
+  ) as HTMLDivElement;
   errorMessage.textContent = text;
   errorMessage.classList.remove("hidden");
   setTimeout(() => {
