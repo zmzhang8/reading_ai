@@ -5,6 +5,7 @@ import {
   ChatOptions,
   ChatRole,
 } from "./chat_model";
+import { withTimeout } from "../utils/time";
 
 const STATUS_API_ENDPOINT = "https://duckduckgo.com/duckchat/v1/status";
 const CHAT_API_ENDPOINT = "https://duckduckgo.com/duckchat/v1/chat";
@@ -25,19 +26,23 @@ export class DuckDuckGoChatModel implements ChatModel {
     options?: ChatOptions
   ): Promise<string> {
     const contents = this.constructMessages(messages, systemInstruction);
-    const vqd = await this.getVqd();
-    const response = await fetchWithTimeout(
-      CHAT_API_ENDPOINT,
-      {
-        headers: { "x-vqd-4": vqd, "Content-Type": "application/json" },
-        method: "POST",
-        body: JSON.stringify({
-          model: this.options.modelName,
-          messages: contents,
-        }),
-      },
-      options?.timeoutMs ?? this.options.timeoutMs
+    const result = await withTimeout(
+      this.fetchResponse(contents),
+      options?.timeoutMs ?? this.options.timeoutMs ?? 0
     );
+    return result;
+  }
+
+  async fetchResponse(messages: MessageParam[]): Promise<string> {
+    const vqd = await this.getVqd();
+    const response = await fetch(CHAT_API_ENDPOINT, {
+      headers: { "x-vqd-4": vqd, "Content-Type": "application/json" },
+      method: "POST",
+      body: JSON.stringify({
+        model: this.options.modelName,
+        messages: messages,
+      }),
+    });
     if (!response.ok) {
       throw Error(`Fetch error: ${response.status} ${response.statusText}`);
     }
@@ -58,8 +63,8 @@ export class DuckDuckGoChatModel implements ChatModel {
       let result = "";
       try {
         for (const line of data.split("\n")) {
-          if (line.trim()) {
-            const parsed = JSON.parse(line.substring(line.indexOf("{")));
+          if (line.trim().startsWith("data:")) {
+            const parsed = JSON.parse(line.trim().substring(5));
             result += parsed["message"] ?? "";
           }
         }
@@ -102,16 +107,4 @@ export class DuckDuckGoChatModel implements ChatModel {
       return this.vqd;
     }
   }
-}
-
-async function fetchWithTimeout(
-  input: RequestInfo | URL,
-  init?: RequestInit,
-  timeoutMs?: number
-): Promise<Response> {
-  const timeoutPromise = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error("Request timed out")), timeoutMs)
-  );
-  const responsePromise = fetch(input, init);
-  return Promise.race([responsePromise, timeoutPromise]);
 }
