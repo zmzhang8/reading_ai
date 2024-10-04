@@ -13,6 +13,7 @@ let disabledInteraction = false;
 let pageContent: string | undefined;
 
 document.addEventListener("DOMContentLoaded", () => {
+  setupReplayButton();
   setupInput();
   setupSendButton();
   setupKeyboardShortcuts();
@@ -58,6 +59,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+function setupReplayButton() {
+  const replayButton = document.getElementById(
+    "replay-button"
+  ) as HTMLButtonElement;
+  replayButton.addEventListener("click", () => {
+    agentCompletion(AgentType.DocumentAgent);
+  });
+}
 
 function resizeInputHeight() {
   const userInput = document.getElementById(
@@ -164,6 +174,9 @@ async function addMessage(message: ChatMessage) {
     const chatMessages = document.getElementById(
       "chat-messages"
     ) as HTMLDivElement;
+    const replayButton = document.getElementById(
+      "replay-button"
+    ) as HTMLButtonElement;
     const messageElement = document.createElement("div");
     messageElement.classList.add("message");
     messageElement.classList.add(
@@ -171,27 +184,37 @@ async function addMessage(message: ChatMessage) {
     );
     messageElement.innerHTML = content;
     chatMessages.appendChild(messageElement);
+    chatMessages.insertBefore(messageElement, replayButton);
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 }
 
-function agentCompletion(type: AgentType, message: string) {
+function agentCompletion(type: AgentType, message?: string) {
   const loaderContainer = document.getElementById(
     "loader-container"
   ) as HTMLDivElement;
   const userInput = document.getElementById(
     "user-input"
   ) as HTMLTextAreaElement;
+  const chatMessages = document.getElementById(
+    "chat-messages"
+  ) as HTMLDivElement;
+  const replayButton = document.getElementById(
+    "replay-button"
+  ) as HTMLButtonElement;
 
   userInput.value = "";
+  replayButton.classList.add("hidden");
   updateSendButtonStatus();
   resizeInputHeight();
-  addMessage({
-    role: ChatRole.User,
-    content: message,
-    userVisible: true,
-    modelVisible: true,
-  });
+  if (message) {
+    addMessage({
+      role: ChatRole.User,
+      content: message,
+      userVisible: true,
+      modelVisible: true,
+    });
+  }
   updateQuickMessagesStatus();
 
   getAgent(type, pageContent, (agent) => {
@@ -209,6 +232,8 @@ function agentCompletion(type: AgentType, message: string) {
           });
         })
         .catch((reason) => {
+          replayButton.classList.remove("hidden");
+          chatMessages.scrollTop = chatMessages.scrollHeight;
           showErrorMessage(reason.toString());
         })
         .finally(() => {
