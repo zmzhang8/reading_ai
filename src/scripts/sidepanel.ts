@@ -222,7 +222,7 @@ function agentCompletion(type: AgentType, message?: string) {
       disabledInteraction = true;
       loaderContainer.classList.remove("hidden");
       agent
-        .generate(chatSession.getModelVisibleMessages(), 5000)
+        .generate(chatSession.getModelVisibleMessages(), 10000)
         .then(async (result) => {
           addMessage({
             role: ChatRole.Model,
